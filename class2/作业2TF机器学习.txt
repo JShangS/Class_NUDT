@@ -1,0 +1,35 @@
+一. 变量定义、初始化:
+
+1）定义三个变量：a,b,c,d。定义其初始化值initial_value均为0~9的随机正整数。
+2）将a,b添加入key为'init'的collection中。并只初始化'init'这个集合中的变量。
+3）此时fetch变量c, 观察出错报告并截图。找到出错原因及对应错误代号。
+4）使用try-except 异常处理方法，收集未被初始化的变量，并将未初始化的变量再次初始化。
+
+要求：不能用tf.global_variables_initializer()，按照步骤完成。提交代码和运行截图。
+
+提示：
+1. tf的异常一般表示为tf.errors.xxxx
+2. tf.add_to_collection(name,v) 将变量v添加入key名为name的集合中，c = tf.get_collection(name)获取key名为name的集合。
+
+二. 分类机器学习：
+
+采用逻辑斯蒂回归（如课程中例子）建立二维数据二分类模型。
+两类数据服从二维高斯分布：
+类A：(??,??)~??(3, 6, 1, 1, 0)
+类B：(??,??)~??(6, 3, 1, 1, 0)
+
+1）分别为类A，类B各随机生成100个样本作为训练数据train_data，30个样本作为验证数据validation_data，30个样本作为测试数据test_data。
+3）建立逻辑斯蒂回归模型并用GradientDescentOptimizer优化器（参数默认0.01）进行优化学习。
+4）采用参数复用方式构建学习、验证两个计算路径。学习过程中，进行500次迭代，每次按顺序取train_data中的20个数据进行训练。每100次迭代用30个验证样本validation_data进行验证。训练过程中，打印训练的损失函数值及模型在验证集上的精度。
+5) 用ckpt方式保存模型，每100次迭代保存一次。
+6）在另一个py文件中写测试流程，用import_meta_graph导入计算图，get_tensor_by_name得到输入placeholder，以及ACC的tensor，建立测试流程，并用test_data对模型进行测试，输出ACC。
+7)  将分类结果绘图（例如用matplotlib），（如课程中例子）A、B类测试数据(分别在图中用‘+’以及‘o’表示)，分类模型以分割线表示。
+
+要求：
+1.测试train_data和验证validation_data用两个不同的placeholder_train，placeholder_validation。采用参数复用的方式构建训练和验证两个计算路径（不能用同一个计算路径喂不同的数据！！！因为train 和validation的batch size 不一样（20，30），所以placeholder的size不一样）。
+2.提交代码和运行截图。
+
+注意：课件中tf.initialize_all_variables已过时，请用tf.global_variables_initializer。
+提示：
+1. 除了loss，需要构造显示分类精度的指标ACC=正确分类的样本数/总的验证样本数
+2. 需要在每次迭代学习中更新送给x和y的batch_x，batch_y数据。
