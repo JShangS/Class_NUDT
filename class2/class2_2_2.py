@@ -47,11 +47,13 @@ with tf.Session(graph=restore_graph) as restore_sess:
     graph = tf.get_default_graph()
     x = graph.get_tensor_by_name('x:0')
     y = graph.get_tensor_by_name('y:0')
-    logist = graph.get_tensor_by_name('add:0')
+    W = graph.get_tensor_by_name('Weigh:0')
+    b = graph.get_tensor_by_name('bias:0')
+    logist = tf.matmul(x, W) + b
     acc = calc_accuracy(logist, y)
     print('\n准确率 ACC =', acc)
     ###################画图##############################
-    N = 100
+    N = 500
     x1_min, x1_max = XA_test.min() - 1, XA_test.max() + 1  # x的范围
     x2_min, x2_max = XB_test.min() - 1, XB_test.max() + 1  # y的范围
     t1 = np.linspace(x1_min, x1_max, N)
