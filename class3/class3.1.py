@@ -11,6 +11,7 @@ from tensorflow.examples.tutorials.mnist import input_data
 ###########计算准确率################################
 def calc_accuracy(pred, y):
     accuracy = tf.equal(tf.to_float(pred>0.5), y)
+    # accuracy = tf.equal(pred, y)
     accuracy = tf.cast(accuracy, tf.float32)
     accuracy = tf.reduce_mean(accuracy)
     return sess.run(accuracy, feed_dict={x1: X_test1, x2: X_test2, y: Y_test})
@@ -65,11 +66,11 @@ y = tf.placeholder(tf.float32, shape=[None, 1], name='label')
 ###第一层###################
 L11, L12 = add_layer(x1, x2, 784, 500, tf.nn.relu)
 ###第二个层###################
-L21, L22 = add_layer(L11, L12, 500, 10, tf.nn.relu)  #tf.nn.softmax #tf.nn.relu
+L21, L22 = add_layer(L11, L12, 500, 10)  #tf.nn.softmax #tf.nn.relu
 ###############计算Ew和预测##################
 Ew = tf.sqrt(tf.reduce_sum(tf.square(tf.subtract(L21, L22)), 1))
-pred = 2 * tf.nn.sigmoid(Ew) - 1
-# pred = tf.to_float(tf.equal(tf.argmax(L21, 1), tf.argmax(L22, 1)))
+pred = 2 * tf.nn.sigmoid(Ew) - 1 
+# pred = tf.to_float(tf.equal(tf.argmax(L11, 1), tf.argmax(L12, 1)))
 ############loss#############
 Q = tf.constant(5, dtype=tf.float32)
 # loss = tf.reduce_mean(tf.square(y - pred))
@@ -79,21 +80,22 @@ loss = tf.add(
     tf.multiply(
         tf.multiply(tf.multiply(y, 2.0), Q),
         tf.exp(tf.multiply(tf.div(-2.77, Q), Ew))))
-lr = 0.001
+lr = 0.1
 optimizer = tf.train.AdamOptimizer(
     learning_rate=lr)  #AdamOptimizer#GradientDescentOptimizer
 train = optimizer.minimize(loss=(loss))  #tf.reduce_mean
 ################会话############################
 batch_size = 320
-batch_size_test = 32
+batch_size_test = 320
 ACC = []
+Loss = []
 with tf.Session() as sess:
     iter = 200001
     sess.run(tf.global_variables_initializer())
     for itera in range(iter):
-        y__s = []
-        x__1 = []
-        x__2 = []
+        # y__s = []
+        # x__1 = []
+        # x__2 = []
         x_1, y_1 = mnist.train.next_batch(batch_size)
         x_2, y_2 = mnist.train.next_batch(batch_size)
         y_s = np.array(y_1 != y_2, dtype=np.float).reshape(-1, 1)
@@ -102,18 +104,19 @@ with tf.Session() as sess:
         if len(index0) < 32:
             continue
         index1 = np.argwhere(y_s == 1)[:, 0]
-        y__s = np.append(y_s[index0[0:32], :], y_s[index1[0:32], :], axis=0)
-        x__1 = np.append(x_1[index0[0:32], :], x_1[index1[0:32], :], axis=0)
-        x__2 = np.append(x_2[index0[0:32], :], x_2[index1[0:32], :], axis=0)
+        y_s = np.append(y_s[index0[0:32], :], y_s[index1[0:32], :], axis=0)
+        x_1 = np.append(x_1[index0[0:32], :], x_1[index1[0:32], :], axis=0)
+        x_2 = np.append(x_2[index0[0:32], :], x_2[index1[0:32], :], axis=0)
         _, l, y_pred, rEw = sess.run(
             [train, loss, pred, Ew], feed_dict={
-                x1: x__1,
-                x2: x__2,
-                y: y__s
+                x1: x_1,
+                x2: x_2,
+                y: y_s
             })
+        Loss = np.append(Loss,l)
         if itera % 1000 == 0:
             print('\n')
-            print('第', itera, '次迭代，损失为： ', sess.run(tf.reduce_mean(l)))
+            print('第', itera, '次迭代，损失为： ', sess.run(tf.reduce_mean(Loss)))
             # print(y__s)
             # print(y_pred)
             # print(rEw)
@@ -122,6 +125,14 @@ with tf.Session() as sess:
             X_test2, Y_test2 = mnist.test.next_batch(batch_size_test)
             Y_test = np.array(
                 Y_test1 != Y_test2, dtype=np.float).reshape(-1, 1)
+            #####降采样###################    
+            index0 = np.argwhere(Y_test == 0)[:, 0]
+            if len(index0) < 32:
+                continue
+            index1 = np.argwhere(Y_test == 1)[:, 0]
+            Y_test = np.append(Y_test[index0[0:32], :], Y_test[index1[0:32], :], axis=0)
+            X_test1 = np.append(X_test1[index0[0:32], :], X_test1[index1[0:32], :], axis=0)
+            X_test2 = np.append(X_test2[index0[0:32], :], X_test2[index1[0:32], :], axis=0)
             #######准确率########################
             ACC.append(calc_accuracy(pred, y))
 
@@ -131,7 +142,7 @@ with tf.Session() as sess:
             #     x2: X_test2,
             # }))
             # print('\n', Y_test)
-            # print('准确率 ACC =', ACC[-1])
+            print('准确率 ACC =', sess.run(tf.reduce_mean(ACC)))
             # print(y_s)
 
 tf.logging.set_verbosity(old_v)
