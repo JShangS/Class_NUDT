@@ -1,0 +1,114 @@
+将LENET封装为class，并用此封装好的lenet对minist进行分类。
+
+
+
+1. lenet 结构如附件描述。注意：
+
+
+（1）lenet 输入为32x32，而minist为28x28，故需要先对数据进行填充，例如：
+
+
+import numpy as np
+
+# Pad images with 0s
+X_train      = np.pad(X_train, ((0,0),(2,2),(2,2),(0,0)), 'constant')
+X_validation = np.pad(X_validation, ((0,0),(2,2),(2,2),(0,0)), 'constant')
+X_test       = np.pad(X_test, ((0,0),(2,2),(2,2),(0,0)), 'constant')
+    
+print("Updated Image Shape: {}".format(X_train[0].shape))
+
+from sklearn.utils import shuffle
+
+X_train, y_train = shuffle(X_train, y_train)
+（2）lenet 输出 10位的 one-hot形式的输出 logits, 故minist的标签读取需采用one-hot的形式。
+
+采用softmax 交叉熵作为损失函数。用softmax进行分类。
+
+
+
+2. 在init函数中传入初始化变量所需的mu， sigma参数，以及其他所需定制化参数。
+
+例如：
+
+
+def __init__(self,mu):
+
+    self.mu=mu
+
+
+设计需要的输入输出接，例如，如果想把对外数据的交互也封装在class里：
+
+
+self.raw_input_image = tf.placeholder(tf.float32, [None, 784]) 或者需要的进一步变换，例如
+
+self.input_x = tf.reshape(self.raw_input_image, [-1, 28, 28, 1])
+
+
+或者把外部交互的事情交给外部去做，class只是想实现一个纯净的net计算通路：
+
+self.input_x=input (input是你外部给的输入引用)
+
+
+3. 对lenet中常见的conv层，fc层，pooling层定义统一的定制化功能层graph绘图函数. 为层次化组织网络，给每个层定义一个不同的名字空间，例如：
+
+def conv(w_shape, scope_name, .......):
+
+    with tf.name_scope(scope_name) as scope:
+
+        xxxx.....
+
+
+4. 绘制整个网络计算图的函数，net_build(). 这里要求调用net_build()的过程放在 _init_函数里，这样外部每调用并生成一个class的实例，实际上就自动绘制了一次lenet。
+
+
+net_build()绘制整个lenet的时候，调用之前你定义的各个功能层，并逐层搭建出整个网络。期望网络对外的输出tensor引用都用self记录，例如：
+
+def __init__(xxxxxx):
+
+    
+
+    xxxxx
+
+        with tf.variable_scope("Lenet_var") as scope:
+            self.train_digits = self.net_build(is_trained=True,xxxxx)
+            scope.reuse_variables()
+            self.pred_digits = self.net_build(is_trained=False,xxxxx)
+    
+
+
+def net_build(self,is_trained = True，xxxx......):
+
+    with tf.name_scope('lenet') as scope:
+
+        net=conv(input_x, xxxx,scope_name='conv1')
+
+        net=pool(net, xxxx,scope_name='conv1')
+
+        .....
+
+        return xxx, xxx,xxx
+
+       
+
+5. 在外部调用该模块并通过实例化实现对lenet的绘制，例如：
+
+
+......
+
+from lenet import Lenet （lenet.py 里定义的 class Lenet）
+
+.......
+
+lenet_part = Lenet() 
+
+
+这样调用一下已经完成了lenet的绘制了，你需要引用的lenet中间的tensor都保存在lenet_part里
+
+
+例如：
+
+sess.run(train_op,feed_dict={lenet.raw_input_image: batch[0],lenet.raw_input_label: batch[1]})
+
+
+
+要求：用class封装好的lenet对minist进行分类，训练和模型定义分开成两个文件train.py, lenet.py，打印训练和测试截图，测试分类准确率ACC。
