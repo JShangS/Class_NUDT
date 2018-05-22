@@ -151,6 +151,6 @@ with tf.Session() as sess:
             # ACC.append(calc_accuracy(pred, y))
             ACC = calc_accuracy(pred, y)
             print('准确率 ACC =', ACC)
-            saver.save(sess, './model_class3_2/my_test_model')
+            saver.save(sess, './model_class3/my_test_model')
 
 tf.logging.set_verbosity(old_v)

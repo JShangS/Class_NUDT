@@ -5,11 +5,12 @@ import numpy as np
 class Lennet(object):
     #############构造函数#######################
     def __init__(self, NumClass):
-        self.raw_input_image = tf.placeholder(tf.float32, [None, 1024])
-        self.input_x = tf.reshape(self.raw_input_image, [-1, 32, 32, 1])
-        self.input_y = tf.placeholder(tf.float32, [None, 10])
-        self.NumClass = NumClass
-        with tf.variable_scope("Lenet_var") as scope:
+        with tf.variable_scope("lenet_var") as scope:
+            self.raw_input_image = tf.placeholder(tf.float32, [None, 1024])
+            self.input_x = tf.reshape(
+            self.raw_input_image, [-1, 32, 32, 1], name='input')
+            self.input_y = tf.placeholder(tf.float32, [None, 10],name='label')
+            self.NumClass = NumClass
             self.logist = self.buildCNN(self.input_x, self.NumClass)
             scope.reuse_variables()
 
@@ -54,7 +55,7 @@ class Lennet(object):
                   activeFunction=None):  ####data_format='NHWC'默认的
         channel = int(input.get_shape()[-1])
         # channel = int(1)
-        print('channel:', channel)
+        # print('channel:', channel)
         with tf.variable_scope(name) as scope:
             w = tf.get_variable(
                 initializer=tf.truncated_normal(
@@ -92,7 +93,7 @@ class Lennet(object):
             padding=padding)
 
     ##############画图########################
-    def buildCNN(self, input, NumClass):
+    def buildCNN(self, input, NumClass, isTrained=True):
         with tf.name_scope('lenet') as scope:
             mu = 0.0
             sigma = 0.1
