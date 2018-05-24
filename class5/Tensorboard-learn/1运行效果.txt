@@ -1,0 +1,26 @@
+F:\ProgramData\Anaconda3\python.exe E:/python-workspace/Tensorboard-learn/1.py
+Extracting d:/tensorboard/mnist\train-images-idx3-ubyte.gz
+Extracting d:/tensorboard/mnist\train-labels-idx1-ubyte.gz
+Extracting d:/tensorboard/mnist\t10k-images-idx3-ubyte.gz
+Extracting d:/tensorboard/mnist\t10k-labels-idx1-ubyte.gz
+step 0, training accuracy 0.09
+step 100, training accuracy 0.08
+step 200, training accuracy 0.08
+step 300, training accuracy 0.06
+step 400, training accuracy 0.08
+step 500, training accuracy 0.09
+step 600, training accuracy 0.08
+step 700, training accuracy 0.08
+step 800, training accuracy 0.15
+step 900, training accuracy 0.08
+step 1000, training accuracy 0.1
+step 1100, training accuracy 0.13
+step 1200, training accuracy 0.11
+step 1300, training accuracy 0.11
+step 1400, training accuracy 0.11
+step 1500, training accuracy 0.11
+step 1600, training accuracy 0.13
+step 1700, training accuracy 0.07
+step 1800, training accuracy 0.09
+step 1900, training accuracy 0.1
+step 2000, training accuracy 0.1
